@@ -1,0 +1,19 @@
+.container{
+    height: 20vh;
+    display: flex;
+    padding: 40px 40px;
+    width: 100vw;
+    justify-content: space-between;
+}
+
+.logout_button {
+    height: 5vh;
+  background-color: #e53935;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+}

@@ -1,8 +1,20 @@
 import { configureStore } from "@reduxjs/toolkit";
-import register from './slice/slice.js';
+import userReducer from './slice/slice.js';
+import { loadState, saveState } from "./localstorage.js";
 
-export default configureStore({
-    reducer:{
-        user: register,
-    },
-})
+const persistedState =loadState();
+
+const store= configureStore({
+  reducer: {
+    users: userReducer,
+  },
+  preloadedState:persistedState
+});
+
+store.subscribe(() => {
+  saveState({
+    user: store.getState().user
+  });
+});
+
+export default store;
