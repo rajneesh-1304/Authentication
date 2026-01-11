@@ -15,7 +15,7 @@ import { login, register as registerUser } from '../../redux/slice/slice.js';
 import './login.css';
 
 const LoginUserSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+  identifier: z.string().min(3, { message: "Username or Email required" }),
   password: z.string().min(8, { message: "Password must be at least 8 digits" }),
 });
 
@@ -40,24 +40,27 @@ export default function LoginForm() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(LoginUserSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { identifier: '', password: '' },
   });
 
-  const email = watch('email');
+  const identifier = watch('identifier');
   const password = watch('password');
-  const isDisabled = !email || !password;
+  const isDisabled = !identifier || !password;
 
   const onSubmit = (data) => {
-    const existingUser = users.find(u => u.email === data.email && u.password === data.password);
+    const { identifier, password } = data;
+    const existingUser = users.find( u =>(u.email === identifier || u.username === identifier) &&u.password === password);
+
     if (existingUser) {
-      dispatch(login(data));
+      dispatch(login({ identifier, password }));
       setSnackbarMessage('Login successful!');
       setSnackbarOpen(true);
     } else {
-      setSnackbarMessage('User not registered');
+      setSnackbarMessage('Invalid username/email or password');
       setSnackbarOpen(true);
     }
   };
+
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -81,12 +84,13 @@ export default function LoginForm() {
         <Box sx={{ display: 'flex', flexDirection: 'column', width: 300, gap: 2 }}>
           <FormControl variant="standard">
             <TextField
-              label="Email"
+              label="Username / Email"
               variant="outlined"
-              {...register('email')}
-              error={!!errors.email}
-              helperText={errors.email ? errors.email.message : ''}
+              {...register('identifier')}
+              error={!!errors.identifier}
+              helperText={errors.identifier?.message}
             />
+
           </FormControl>
 
           <FormControl variant="standard">

@@ -22,9 +22,15 @@ import CloseIcon from '@mui/icons-material/Close';
 
 
 const RegisterUserSchema = z.object({
+    username: z.string().min(3, { message: "Username required" }),
     email: z.string().email({ message: "Invalid email address" }),
-    password: z.string().min(8, { message: "Password must be at least 8 digits" })
-})
+    password: z.string().min(8, { message: "Password must be at least 8 digits" }),
+    confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+});
+
 
 
 export default function RegisterForm() {
@@ -46,7 +52,7 @@ export default function RegisterForm() {
         navigate('/');
     }
     const onSubmit = (data) => {
-        const existingUser = users.find(u => u.email === data.email);
+        const existingUser = users.find(u => u.email === data.email || u.username === data.username);
         if (existingUser) {
             setSnackbarMessage('User already exists, please enter different data');
             setSnackbarOpen(true);
@@ -54,6 +60,10 @@ export default function RegisterForm() {
             dispatch(registerUser(data));
             setSnackbarMessage('Registered successfully!');
             setSnackbarOpen(true);
+
+            setTimeout(() => {
+                navigate('/');
+            }, 1500);
         }
     }
     const {
@@ -64,9 +74,12 @@ export default function RegisterForm() {
     } = useForm({
         resolver: zodResolver(RegisterUserSchema),
         defaultValues: {
+            username: '',
             email: '',
             password: '',
+            confirmPassword: '',
         },
+
     });
 
     const action = (
@@ -100,6 +113,14 @@ export default function RegisterForm() {
                         gap: 2,
                     }}
                 >
+                    <TextField
+                        label="Username"
+                        variant="outlined"
+                        {...register('username')}
+                        error={!!errors.username}
+                        helperText={errors.username?.message}
+                    />
+
                     <FormControl variant="standard">
                         <TextField
                             label="Email"
@@ -121,6 +142,14 @@ export default function RegisterForm() {
                         />
                     </FormControl>
 
+                    <TextField
+                        label="Confirm Password"
+                        type="password"
+                        variant="outlined"
+                        {...register('confirmPassword')}
+                        error={!!errors.confirmPassword}
+                        helperText={errors.confirmPassword?.message}
+                    />
                     <Button variant="contained" sx={{ mt: 2 }} type="submit" disabled={isDisabled} >
                         Register
                     </Button>

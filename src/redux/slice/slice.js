@@ -3,14 +3,14 @@ import { createSlice } from "@reduxjs/toolkit";
 export const userSlice = createSlice({
     name:'user',
     initialState:{
-        users:[{email: 'kumar@gmail.com', password: '12345678'}],
+        users:[{username:'kumar', email: 'kumar@gmail.com', password: '12345678'}],
         currUser:null,
         isAuthenticated: false,
     },
     reducers: {
         register : (state, action) => {
             const currentUser = action.payload;
-            const found = state.users.find(user => user.email === currentUser.email)
+            const found = state.users.find(user => user.email === currentUser.email || user.username === currentUser.username)
             if(!found){
                 state.users.push(currentUser);
             }else{
@@ -18,13 +18,14 @@ export const userSlice = createSlice({
             }
     },
     login : (state, action)=>{
-        const currentUser=action.payload;
-        const found = state.users.find(user => user.email === currentUser.email && user.password ===currentUser.password)
+        const { identifier, password } = action.payload;
+        const found = state.users.find(user => (user.email === identifier || user.username === identifier) && user.password ===password)
         if(found){
-            state.isAuthenticated=true;
             state.currUser=found;
+            state.isAuthenticated=true;
             console.log('User Logged In successfully');
         }else{
+            state.currUser = null;
             state.isAuthenticated=false;
             console.log('Invalid Credentials')
         }
